@@ -2,6 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import update_last_login
 from django.db.models import Q 
 from django.utils import timezone 
 from django.http import HttpResponse 
@@ -208,3 +211,24 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return Usuario.objects.all()
         return Usuario.objects.filter(id=user.id)
+    
+# API Actualiza last_login
+class CustomLoginView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        # Validamos usuario y contraseña (Django)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        
+        update_last_login(None, user)
+        
+        # Genera/obtiene el token
+        token, created = Token.objects.get_or_create(user=user)
+        
+        # Token (datos al loguear)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email,
+            'rol': user.rol
+        })

@@ -18,6 +18,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
         
+        # Si cambian el email, actualiza tambien el username
+        if 'email' in validated_data:
+            validated_data['username'] = validated_data['email']
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
