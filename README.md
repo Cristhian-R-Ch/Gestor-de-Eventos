@@ -5,7 +5,7 @@
 python -m venv venv
 .\venv\Scripts\activate
 
-## Requerimientos
+## Requisitos
 pip install -r requirements.txt
 
 ## SQL - Tablas+Datos
