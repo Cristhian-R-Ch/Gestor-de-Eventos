@@ -7,6 +7,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import update_last_login
 from django.db.models import Q 
 from django.utils import timezone 
+from django.utils.dateparse import parse_date
+from datetime import datetime, time
 from django.http import HttpResponse 
 from .models import Usuario, Evento, Reserva
 from .serializers import UsuarioSerializer, EventoSerializer, ReservaSerializer
@@ -31,8 +33,19 @@ class EventoViewSet(viewsets.ModelViewSet):
                 Q(ubicacion__icontains=search_query)
             )
             
+        # Filtro por Fecha
         if fecha_query:
-            queryset = queryset.filter(fecha_inicio__date=fecha_query)
+            # texto 'yyyy-mm-dd' a objeto fecha
+            fecha_obj = parse_date(fecha_query)
+            
+            if fecha_obj:
+                # inicio (00:00) y fin (23:59) 
+                # make_aware zona horaria de Chile (settings.py)
+                start_of_day = timezone.make_aware(datetime.combine(fecha_obj, time.min))
+                end_of_day = timezone.make_aware(datetime.combine(fecha_obj, time.max))
+                
+                # evento que empiece DENTRO del rango
+                queryset = queryset.filter(fecha_inicio__range=(start_of_day, end_of_day))
             
         return queryset
     

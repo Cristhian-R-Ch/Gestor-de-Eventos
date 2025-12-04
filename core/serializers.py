@@ -45,6 +45,25 @@ class EventoSerializer(serializers.ModelSerializer):
         ocupados = sum(r.cantidad_plazas for r in reservas)
         return obj.capacidad - ocupados
 
+    # VALIDACION FECHAS 
+    def validate(self, data):
+        # fechas en la peticion
+        inicio = data.get('fecha_inicio')
+        fin = data.get('fecha_fin')
+
+        # edit (PATCH), fecha en la instancia (self.instance)
+        if self.instance:
+            inicio = inicio or self.instance.fecha_inicio
+            fin = fin or self.instance.fecha_fin
+
+        # Fin no puede ser antes que Inicio
+        if inicio and fin and fin < inicio:
+            raise serializers.ValidationError({
+                "fecha_fin": "La fecha de fin no puede ser anterior a la fecha de inicio"
+            })
+
+        return data
+    
 # Serializer de Reservas
 class ReservaSerializer(serializers.ModelSerializer):
     class Meta:
