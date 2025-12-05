@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Usuario, Evento, Reserva
 
 # Serializer de Usuarios (registro y edición con encript.)
@@ -61,6 +62,15 @@ class EventoSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "fecha_fin": "La fecha de fin no puede ser anterior a la fecha de inicio"
             })
+        
+    # === Update a Evento Finalizado ===
+    def to_representation(self, instance):
+        # Obtiene la data
+        data = super().to_representation(instance)
+        
+        # Logica Automática: Si NO esta cancelado Y la fecha de fin ya paso...
+        if data['estado'] != 'cancelado' and instance.fecha_fin < timezone.now():
+            data['estado'] = 'finalizado' # lo muestra como finalizado
 
         return data
     
@@ -75,4 +85,5 @@ class ReservaSerializer(serializers.ModelSerializer):
         response = super().to_representation(instance)
         if instance.usuario:
             response['usuario'] = instance.usuario.email
+            response['usuario_nombre'] = f"{instance.usuario.nombre} {instance.usuario.apellido}".strip()
         return response
