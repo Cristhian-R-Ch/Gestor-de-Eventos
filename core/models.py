@@ -20,6 +20,24 @@ class Usuario(AbstractUser):
     USERNAME_FIELD = 'email' 
     REQUIRED_FIELDS = ['username', 'nombre', 'apellido']
 
+    #Equivalente rol y is_staff
+    def save(self, *args, **kwargs):
+        # rol es 'admin'== is_staff 
+        if self.rol == 'admin':
+            self.is_staff = True
+        else:
+            # no es admin, quita is_staff (a menos que sea superusuario)
+            if not self.is_superuser:
+                self.is_staff = False
+        
+        if self.estado == 'inactivo':
+            self.is_active = False  # Bloquea el login
+        else:
+            self.is_active = True   # Permite el login
+
+        # Guarda cambios en BD
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.email
 

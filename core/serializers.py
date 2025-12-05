@@ -6,7 +6,7 @@ from .models import Usuario, Evento, Reserva
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'nombre', 'apellido', 'rol', 'password']
+        fields = ['id', 'email', 'nombre', 'apellido', 'rol', 'estado', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     # Crear usuario encriptando contraseña

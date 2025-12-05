@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'backend_proyecto.urls'
@@ -139,7 +140,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CORS_ALLOW_ALL_ORIGINS = True
+#CORS_ALLOW_ALL_ORIGINS = True
+#Restringir CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 AUTH_USER_MODEL = 'core.Usuario'
 
 # SEGURIDAD GLOBAL DE LA API (RESTRICT)
@@ -154,3 +160,33 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication', # ver la API en el navegador
     )
 }
+
+# ==========================================
+# CONFIG OWASP
+# ==========================================
+# Cabecera Anti-Clickjacking
+X_FRAME_OPTIONS = 'DENY'
+
+# Encabezado X-Content-Type-Options
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Browser XSS Filter (seguridad extra)
+SECURE_BROWSER_XSS_FILTER = True
+
+# Strict-Transport-Security (HSTS), ZAP dejará de marcarlo como "falta configuración"
+# (Nota: fuerza HTTPS. En localhost (HTTP) no tendra efecto real)
+SECURE_HSTS_SECONDS = 31536000  # un año
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Content Security Policy (CSP)
+# Def scripts/imágenes que puede cargar el navegador.
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'") # Permite estilos inline (necesario para React a veces)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'") # React dev necesita esto
+CSP_IMG_SRC = ("'self'", "data:", "https://placehold.co") # Permite imágenes locales y placeholders
+CSP_FONT_SRC = ("'self'", "data:")
+
+# 6. Cookies Seguras (Opcional para HTTPS)
+# SESSION_COOKIE_SECURE = True  # Descomentar si se usa HTTPS
+# CSRF_COOKIE_SECURE = True     # Descomentar si se usa HTTPS
