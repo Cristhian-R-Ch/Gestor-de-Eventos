@@ -62,6 +62,7 @@ class EventoSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "fecha_fin": "La fecha de fin no puede ser anterior a la fecha de inicio"
             })
+        return data
         
     # === Update a Evento Finalizado ===
     def to_representation(self, instance):
